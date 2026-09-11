@@ -217,10 +217,10 @@ export function ScannerPage() {
                 placeholder="security@paypa1.com"
                 className="w-full min-w-0 rounded-xl border border-slate-300 bg-slate-100 px-4 py-3.5 text-sm text-slate-900 transition placeholder:text-slate-500 hover:border-slate-400 focus:border-slate-500 focus:bg-slate-100 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-400 dark:focus:border-zinc-500 dark:focus:bg-zinc-800"
               />
-              <div className="mt-0 rounded-2xl bg-slate-950 p-5 text-white dark:bg-emerald-950/60 lg:mt-auto lg:pt-8">
+              <div className="mt-0 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-slate-900 dark:border-emerald-900/60 dark:bg-emerald-950/60 dark:text-white lg:mt-auto lg:pt-8">
                 <ShieldCheck className="mb-5 h-8 w-8 text-emerald-400" />
                 <p className="text-sm font-semibold">Privacy by design</p>
-                <p className="mt-2 text-xs leading-5 text-white/65">Your email is processed by your own backend and local open-source model. PhishGuard does not store scan contents.</p>
+                <p className="mt-2 text-xs leading-5 text-slate-600 dark:text-white/65">Your email is processed by your own backend and local open-source model. PhishGuard does not store scan contents.</p>
               </div>
             </div>
 
@@ -291,9 +291,9 @@ export function ScannerPage() {
               <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-panel dark:border-zinc-800 dark:bg-zinc-900">
                 <Gauge score={result.overall_score} level={result.risk_level} />
               </div>
-              <div className="rounded-3xl bg-slate-950 p-7 text-white shadow-panel dark:bg-emerald-950/60">
+              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-7 text-slate-900 shadow-panel dark:border-emerald-900/60 dark:bg-emerald-950/60 dark:text-white">
                 <p className="text-xs font-bold uppercase tracking-[.18em] text-emerald-400">What to do next</p>
-                <p className="mt-4 text-base leading-7 text-white/80">{result.educational_advice}</p>
+                <p className="mt-4 text-base leading-7 text-slate-700 dark:text-white/80">{result.educational_advice}</p>
               </div>
             </div>
 
