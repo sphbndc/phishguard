@@ -140,17 +140,18 @@ export function ScannerPage() {
     const margin = 48;
     let y = 54;
     const addWatermark = () => {
-      pdf.setTextColor(226, 232, 240);
+      pdf.setGState(pdf.GState({ opacity: 0.08 }));
+      pdf.setTextColor(100, 116, 139);
       pdf.setFontSize(30);
       pdf.setFont("helvetica", "bold");
       pdf.text("PHISHGUARD", pageWidth / 2, pageHeight / 2, { align: "center", angle: 35 });
+      pdf.setGState(pdf.GState({ opacity: 1 }));
       pdf.setTextColor(15, 23, 42);
     };
     const ensureSpace = (height: number) => {
       if (y + height > pageHeight - 52) {
         pdf.addPage();
         y = 54;
-        addWatermark();
       }
     };
     const bodyWidth = pageWidth - margin * 2;
@@ -167,7 +168,6 @@ export function ScannerPage() {
       pdf.setTextColor(71, 85, 105); pdf.setFont("helvetica", "normal"); pdf.setFontSize(8.5); pdf.text(wrapped, margin + 10, y + 16, { lineHeightFactor: 1.3 });
       y += wrapped.length * 12 + 25;
     };
-    addWatermark();
     pdf.setFillColor(15, 23, 42);
     pdf.roundedRect(margin, y - 24, bodyWidth, 76, 10, 10, "F");
     pdf.setFillColor(16, 185, 129); pdf.roundedRect(margin, y - 24, 8, 76, 4, 4, "F");
@@ -191,7 +191,7 @@ export function ScannerPage() {
     section("ADVISORY NOTICE");
     paragraph("Generated locally by PhishGuard. Verify high-impact requests through an independent channel. This report is informational and does not guarantee message safety.");
     const pages = pdf.getNumberOfPages();
-    for (let page = 1; page <= pages; page += 1) { pdf.setPage(page); pdf.setTextColor(100, 116, 139); pdf.setFontSize(8); pdf.text(`PhishGuard | Confidential scan report | ${page}/${pages}`, margin, pageHeight - 24); pdf.text("phishguard-drab-five.vercel.app", pageWidth - margin, pageHeight - 24, { align: "right" }); }
+    for (let page = 1; page <= pages; page += 1) { pdf.setPage(page); addWatermark(); pdf.setTextColor(100, 116, 139); pdf.setFontSize(8); pdf.text(`PhishGuard | Confidential scan report | ${page}/${pages}`, margin, pageHeight - 24); pdf.text("phishguard-drab-five.vercel.app", pageWidth - margin, pageHeight - 24, { align: "right" }); }
     pdf.save(`phishguard-report-${new Date().toISOString().slice(0, 10)}.pdf`);
   }
 
