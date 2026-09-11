@@ -22,8 +22,10 @@ pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 ```
 
-The model is loaded lazily on the first scan. Set `PHISHGUARD_MODEL` to another
-locally available Hugging Face sequence-classification model if desired. Set
+The compact phishing-trained model `lleratodev/720-bert-mini-phishing-fine-tune`
+is loaded lazily on the first scan. Set `PHISHGUARD_MODEL` to another locally
+available Hugging Face sequence-classification model if desired. Set
+`PHISHGUARD_TORCH_THREADS` to tune CPU thread usage on larger instances, or set
 `TRANSFORMERS_OFFLINE=1` to enforce cache-only operation.
 
 ## Run the frontend locally

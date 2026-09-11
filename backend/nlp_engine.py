@@ -7,7 +7,10 @@ from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_MODEL = "ealvaradob/bert-finetuned-phishing"
+# Compact phishing-trained model suitable for small cloud instances. The
+# previous full-size BERT checkpoint could exceed Render Free's memory limit
+# once PyTorch, tokenization, and FastAPI were resident in the same process.
+DEFAULT_MODEL = "lleratodev/720-bert-mini-phishing-fine-tune"
 _classifier = None
 _load_error: str | None = None
 _lock = threading.Lock()
@@ -38,6 +41,13 @@ def _load_classifier():
         if _classifier is not None or _load_error is not None:
             return _classifier
         try:
+            # Keep the single-worker API predictable on constrained instances.
+            # These settings are applied before the first inference thread is
+            # created and can be overridden for larger deployments.
+            import torch
+
+            torch.set_num_threads(max(1, int(os.getenv("PHISHGUARD_TORCH_THREADS", "1"))))
+            torch.set_num_interop_threads(1)
             from transformers import pipeline
 
             model_name = os.getenv("PHISHGUARD_MODEL", DEFAULT_MODEL)
