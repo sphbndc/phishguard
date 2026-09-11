@@ -57,6 +57,12 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
+@app.get("/")
+def root() -> dict[str, str]:
+    """Human-friendly service status for hosting-platform probes and visitors."""
+    return {"service": "PhishGuard API", "status": "ok", "docs": "/docs"}
+
+
 def _educational_advice(brand: str | None, issues: list[dict[str, str]], score: int) -> str:
     if brand:
         domains = ", ".join(sorted(BRAND_DOMAINS[brand]))
