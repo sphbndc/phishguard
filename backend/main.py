@@ -85,10 +85,15 @@ def _educational_advice(brand: str | None, issues: list[dict[str, str]], score: 
 @app.post("/api/analyze", response_model=AnalyzeResponse)
 def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
     # Gatekeeper check is deliberately independent of model and heuristic output.
-    explicit_auth_pass = all(
-        re.search(rf"\b{mechanism}\s*=\s*pass\b", payload.header, re.IGNORECASE)
-        for mechanism in ("dmarc", "spf", "dkim")
-    )
+    def unambiguous_pass(mechanism: str) -> bool:
+        verdicts = re.findall(
+            rf"\b{mechanism}\s*=\s*(pass|fail|softfail|permerror|neutral|none|temperror)\b",
+            payload.header,
+            re.IGNORECASE,
+        )
+        return bool(verdicts) and all(verdict.lower() == "pass" for verdict in verdicts)
+
+    explicit_auth_pass = all(unambiguous_pass(mechanism) for mechanism in ("dmarc", "spf", "dkim"))
     clean_body = clean_email_text(payload.body)
     heuristic = analyze_heuristics(payload.sender, clean_body)
     # Keep original href targets for link inspection; HTML is never passed to NLP or keyword rules.

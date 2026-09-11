@@ -37,7 +37,16 @@ def analyze_headers(raw_header: str, body: str, sender_domain: str) -> tuple[int
     message = Parser(policy=policy.default).parsestr(raw_header)
     received_spf = message.get_all("Received-SPF", [])
     auth_text = " ".join(message.get_all("Authentication-Results", []) + received_spf)
-    auth = {mechanism.lower(): result.lower() for mechanism, result in AUTH_RESULT_RE.findall(auth_text)}
+    # Prefer a failure when copied headers contain multiple Authentication-
+    # Results lines. A stray pass from an earlier hop must never override a
+    # later fail for the same mechanism.
+    auth_results: dict[str, list[str]] = {}
+    for mechanism, result in AUTH_RESULT_RE.findall(auth_text):
+        auth_results.setdefault(mechanism.lower(), []).append(result.lower())
+    auth = {}
+    for mechanism, results in auth_results.items():
+        failures = [result for result in results if result in {"fail", "softfail", "permerror"}]
+        auth[mechanism] = failures[0] if failures else results[-1]
     if "spf" not in auth:
         for value in received_spf:
             verdict = re.match(r"\s*(pass|fail|softfail|neutral|none|temperror|permerror)\b", value, re.I)
