@@ -39,6 +39,29 @@ standards and security knowledge base is at `/tips`. The frontend uses
 `http://localhost:8000` by default;
 override it with `NEXT_PUBLIC_API_URL` in `frontend/.env.local`.
 
+## Deploy with GitHub and Vercel
+
+The Next.js client can be deployed directly from the public GitHub repository:
+
+1. Sign in at [vercel.com](https://vercel.com) with GitHub and choose
+   `sphbndc/phishguard`.
+2. Set **Root Directory** to `frontend` (keep the detected Next.js preset).
+3. Add `NEXT_PUBLIC_API_URL` as an environment variable containing the public
+   URL of your running FastAPI backend, then deploy.
+
+The FastAPI service should run separately on a Python host (for example,
+Render's free tier) because the local PyTorch/Hugging Face model is not a good
+fit for Vercel's short-lived serverless functions. Start it with:
+
+```bash
+cd backend
+uvicorn main:app --host 0.0.0.0 --port $PORT
+```
+
+After deployment, add the backend's HTTPS URL to Vercel as
+`NEXT_PUBLIC_API_URL` and redeploy the frontend. Configure the backend's CORS
+allowlist for the Vercel domain before production use.
+
 ## Important limitations
 
 PhishGuard is a decision-support tool, not a guarantee that an email is safe.
