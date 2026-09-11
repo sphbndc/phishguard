@@ -38,6 +38,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
+        "https://phishguard-drab-five.vercel.app",
         *[origin.strip() for origin in os.getenv("PHISHGUARD_FRONTEND_ORIGIN", "").split(",") if origin.strip()],
     ],
     allow_credentials=False,
