@@ -140,7 +140,7 @@ def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
         for issue in issues:
             if issue["category"] == "Language model signal":
                 issue["severity"] = "Informational"
-                issue["description"] += " Routine commerce context lowered the impact of this isolated model signal."
+                issue["description"] = "The local classifier produced a strong signal, but routine commerce language and clean deterministic checks indicate no corroborating phishing evidence. The signal was conservatively reduced."
         issues.append({
             "category": "Routine commerce context",
             "severity": "Informational",
@@ -155,7 +155,7 @@ def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
         for issue in issues:
             if issue["category"] == "Language model signal":
                 issue["severity"] = "Informational"
-                issue["description"] += " No independent phishing indicators supported this isolated model signal."
+                issue["description"] = "The local classifier produced a strong signal, but no independent phishing indicators supported it, so the signal was conservatively reduced."
         issues.append({
             "category": "Low-signal message",
             "severity": "Informational",
