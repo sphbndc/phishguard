@@ -99,7 +99,7 @@ export default function Home() {
   function formatReport(report: Result) {
     const lines = [
       "PHISHGUARD SECURITY REPORT",
-      "Scanned by PhishGuard | Crafted by savicst",
+      "Scanned by PhishGuard | Crafted by sphbndc",
       `Generated: ${new Date().toLocaleString()}`,
       "=".repeat(64),
       `RISK ASSESSMENT: ${report.risk_level.toUpperCase()}`,
@@ -156,7 +156,7 @@ export default function Home() {
     pdf.text("PHISHGUARD SECURITY REPORT", margin + 18, y + 2);
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(9);
-    pdf.text("Scanned by PhishGuard | Crafted by savicst", margin + 18, y + 20);
+    pdf.text("Scanned by PhishGuard | Crafted by sphbndc", margin + 18, y + 20);
     y += 62;
     const heading = (text: string) => { ensureSpace(32); pdf.setTextColor(5, 150, 105); pdf.setFont("helvetica", "bold"); pdf.setFontSize(11); pdf.text(text, margin, y); y += 18; };
     const paragraph = (text: string, color: [number, number, number] = [51, 65, 85]) => { const wrapped = pdf.splitTextToSize(text, pageWidth - margin * 2); ensureSpace(wrapped.length * 14 + 8); pdf.setTextColor(...color); pdf.setFont("helvetica", "normal"); pdf.setFontSize(10); pdf.text(wrapped, margin, y, { lineHeightFactor: 1.35 }); y += wrapped.length * 14 + 8; };
