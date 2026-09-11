@@ -74,6 +74,9 @@ def _is_phishing_label(label: str) -> bool:
 
 def phishing_probability(text: str) -> tuple[int | None, str | None]:
     """Return (probability, error). A missing model yields None, never a fake score."""
+    enabled = os.getenv("PHISHGUARD_ENABLE_NLP", "0").strip().lower() in {"1", "true", "yes", "on"}
+    if not enabled:
+        return None, "Local classifier disabled for this deployment; deterministic checks are active"
     classifier = _load_classifier()
     if classifier is None:
         return None, _load_error or "Classifier is unavailable"

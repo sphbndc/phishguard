@@ -23,10 +23,13 @@ uvicorn main:app --reload --port 8000
 ```
 
 The compact phishing-trained model `lleratodev/720-bert-mini-phishing-fine-tune`
-is loaded lazily on the first scan. Set `PHISHGUARD_MODEL` to another locally
-available Hugging Face sequence-classification model if desired. Set
-`PHISHGUARD_TORCH_THREADS` to tune CPU thread usage on larger instances, or set
-`TRANSFORMERS_OFFLINE=1` to enforce cache-only operation.
+is available as an optional local signal. Set `PHISHGUARD_ENABLE_NLP=1` to load
+it; otherwise the API uses deterministic authentication, sender, language, and
+URL checks without importing PyTorch (the recommended setting for Render Free's
+memory limit). Set `PHISHGUARD_MODEL` to another locally available Hugging Face
+sequence-classification model if desired. Set `PHISHGUARD_TORCH_THREADS` to
+tune CPU thread usage on larger instances, or set `TRANSFORMERS_OFFLINE=1` to
+enforce cache-only operation.
 
 ## Run the frontend locally
 
