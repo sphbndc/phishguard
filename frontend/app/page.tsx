@@ -28,7 +28,7 @@ const severityStyles: Record<Severity, string> = {
 function Gauge({ score, level }: { score: number; level: Result["risk_level"] }) {
   const color = score >= 65 ? "#dc2626" : score >= 30 ? "#d97706" : "#16a34a";
   return (
-    <div className="flex items-center gap-5">
+    <div className="flex flex-wrap items-center gap-5">
       <div
         className="gauge-ring h-32 w-32 shrink-0"
         style={{ background: `conic-gradient(${color} ${score * 3.6}deg, #e5e7eb 0deg)` }}
@@ -40,7 +40,7 @@ function Gauge({ score, level }: { score: number; level: Result["risk_level"] })
           <span className="text-[10px] font-bold uppercase tracking-[.18em] text-slate-500">risk</span>
         </div>
       </div>
-      <div>
+      <div className="min-w-0 flex-1">
         <p className="mb-1 text-xs font-bold uppercase tracking-[.18em] text-slate-500">Analysis complete</p>
         <h2 className="text-2xl font-semibold tracking-tight" style={{ color }}>{level}</h2>
         <p className="mt-2 max-w-sm text-sm leading-6 text-slate-600 dark:text-slate-300">A combined score from local language analysis, sender checks, authentication, and link inspection.</p>
@@ -287,18 +287,18 @@ export function ScannerPage() {
               <div className="flex items-center gap-2"><button type="button" onClick={copyReport} title="Copy formatted report" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs font-semibold text-slate-600 transition hover:border-emerald-400 hover:text-emerald-700 dark:border-slate-700 dark:bg-zinc-900 dark:text-slate-300">{copied ? <Check size={14} /> : <Clipboard size={14} />}{copied ? "Copied" : "Copy report"}</button><button type="button" onClick={downloadPdf} title="Download branded PDF" className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-2 text-xs font-semibold text-emerald-700 transition hover:border-emerald-400 dark:border-emerald-900/70 dark:bg-emerald-950/40 dark:text-emerald-300"><Download size={14} />Download PDF</button></div>
             </div>
 
-            <div className="grid gap-5 lg:grid-cols-[.85fr_1.15fr]">
-              <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-panel dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="grid min-w-0 gap-5 lg:grid-cols-[.85fr_1.15fr]">
+              <div className="min-w-0 rounded-3xl border border-slate-200 bg-white p-5 shadow-panel dark:border-zinc-800 dark:bg-zinc-900 sm:p-7">
                 <Gauge score={result.overall_score} level={result.risk_level} />
               </div>
-              <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-7 text-slate-900 shadow-panel dark:border-emerald-900/60 dark:bg-emerald-950/60 dark:text-white">
-                <p className="text-xs font-bold uppercase tracking-[.18em] text-emerald-400">What to do next</p>
-                <p className="mt-4 text-base leading-7 text-slate-700 dark:text-white/80">{result.educational_advice}</p>
+              <div className="min-w-0 rounded-3xl border border-slate-200 bg-white p-5 text-slate-900 shadow-panel dark:border-zinc-800 dark:bg-zinc-900 dark:text-white sm:p-7">
+                <p className="text-xs font-bold uppercase tracking-[.18em] text-emerald-600 dark:text-emerald-400">What to do next</p>
+                <p className="mt-4 text-base leading-7 text-slate-700 dark:text-slate-300">{result.educational_advice}</p>
               </div>
             </div>
 
-            <div className="mt-5 grid gap-5 lg:grid-cols-2">
-              <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-panel dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="mt-5 grid min-w-0 gap-5 lg:grid-cols-2">
+              <div className="min-w-0 rounded-3xl border border-slate-200 bg-white p-5 shadow-panel dark:border-zinc-800 dark:bg-zinc-900 sm:p-7">
                 <div className="mb-6 flex items-end justify-between">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[.18em] text-slate-400">Evidence</p>
@@ -322,7 +322,7 @@ export function ScannerPage() {
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-panel dark:border-zinc-800 dark:bg-zinc-900">
+              <div className="min-w-0 rounded-3xl border border-slate-200 bg-white p-5 shadow-panel dark:border-zinc-800 dark:bg-zinc-900 sm:p-7">
                 <p className="text-xs font-bold uppercase tracking-[.18em] text-slate-400">Destination analysis</p>
                 <h3 className="mt-1 text-xl font-semibold tracking-tight">Uncloaked links</h3>
                 <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200">
