@@ -5,6 +5,11 @@ import { Providers } from "@/components/providers";
 export const metadata: Metadata = {
   title: "PhishGuard — Email threat analysis",
   description: "Local-first phishing detection with explainable security checks.",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
