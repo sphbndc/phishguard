@@ -1,4 +1,3 @@
-import Home from "../page";
+import { ScannerPage } from "../page";
 
-export default Home;
-
+export default ScannerPage;

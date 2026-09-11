@@ -35,8 +35,8 @@ npm run dev
 ```
 
 Open http://localhost:3000. This is the local development version; it does not
-replace the deployed site. The scanner is available at `/` and `/scanner`; the
-standards and security knowledge base is at `/tips`. Locally, the frontend uses
+replace the deployed site. The landing page is available at `/`, the scanner at
+`/scanner`, and the standards and security knowledge base at `/tips`. Locally, the frontend uses
 `http://localhost:8000` for the API by default; override it with
 `NEXT_PUBLIC_API_URL` in `frontend/.env.local` when testing another backend.
 

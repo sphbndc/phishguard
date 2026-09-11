@@ -1,10 +1,12 @@
 ﻿"use client";
 
+import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
-import { Check, ChevronRight, Clipboard, Download, Info, ScanSearch, ShieldCheck, Trash2, X } from "lucide-react";
+import { Activity, ArrowRight, BookOpenCheck, Check, ChevronRight, Clipboard, Download, Info, ScanSearch, ShieldCheck, Trash2, X } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import StackSpread from "@/components/ui/stack-spread";
 
 type Severity = "Critical" | "Warning" | "Informational";
 type Result = {
@@ -47,7 +49,7 @@ function Gauge({ score, level }: { score: number; level: Result["risk_level"] })
   );
 }
 
-export default function Home() {
+export function ScannerPage() {
   const [sender, setSender] = useState("");
   const [body, setBody] = useState("");
   const [header, setHeader] = useState("");
@@ -352,6 +354,35 @@ export default function Home() {
         )}
       </section>
 
+      <SiteFooter />
+    </main>
+  );
+}
+
+const landingHighlights = [
+  [ShieldCheck, "Authentication first", "SPF, DKIM, and DMARC context helps separate trusted infrastructure from impersonation."],
+  [Activity, "Local analysis", "Language and link signals run through your own PhishGuard service with no paid AI API."],
+  [BookOpenCheck, "Clear next steps", "Understand why a message was flagged and learn safer habits from the Standards guide."],
+] as const;
+
+export default function LandingPage() {
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50/60 to-slate-50 text-slate-900 transition-colors duration-200 dark:from-zinc-950 dark:via-emerald-950/35 dark:to-zinc-950 dark:text-slate-100">
+      <SiteHeader />
+      <section className="mx-auto grid max-w-7xl gap-12 px-5 pb-20 pt-16 lg:grid-cols-[1.05fr_.95fr] lg:items-center lg:px-8 lg:pb-28 lg:pt-24">
+        <div>
+          <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/70 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[.2em] text-emerald-700 dark:border-emerald-900/70 dark:bg-zinc-900/70 dark:text-emerald-300"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />Local-first email defense</p>
+          <h1 className="max-w-3xl text-5xl font-semibold leading-[.98] tracking-[-.06em] text-slate-950 dark:text-white sm:text-7xl">Know what&apos;s hiding<br /><span className="text-emerald-500">before you click.</span></h1>
+          <p className="mt-7 max-w-xl text-base leading-8 text-slate-600 dark:text-slate-300">PhishGuard turns suspicious email into understandable evidence. Inspect sender identity, authentication signals, language, and links with an open-source security workflow you control.</p>
+          <div className="mt-9 flex flex-col gap-3 sm:flex-row"><Link href="/scanner" className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 text-sm font-bold text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:-translate-y-0.5 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-950">Scan an email <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" aria-hidden="true" /></Link><Link href="/tips" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white/70 px-5 text-sm font-semibold text-slate-700 transition hover:border-emerald-400 hover:text-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:border-zinc-700 dark:bg-zinc-900/70 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:text-emerald-300 dark:focus:ring-offset-zinc-950">Explore standards <BookOpenCheck className="h-4 w-4" aria-hidden="true" /></Link></div>
+          <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-xs font-medium text-slate-500 dark:text-slate-400"><span className="inline-flex items-center gap-1.5"><ShieldCheck size={14} className="text-emerald-500" />No paid AI API</span><span className="inline-flex items-center gap-1.5"><ShieldCheck size={14} className="text-emerald-500" />HTML cleaned locally</span><span className="inline-flex items-center gap-1.5"><ShieldCheck size={14} className="text-emerald-500" />Actionable reports</span></div>
+        </div>
+        <div className="relative mx-auto w-full max-w-xl"><div className="absolute -inset-8 rounded-[3rem] bg-emerald-400/15 blur-3xl dark:bg-emerald-500/10" /><div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white/80 p-5 shadow-panel backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/80 sm:p-7"><div className="mb-5 flex items-center justify-between"><div><p className="font-mono text-[10px] font-bold uppercase tracking-[.2em] text-emerald-600 dark:text-emerald-400">PhishGuard / overview</p><p className="mt-1 text-sm font-semibold text-slate-900 dark:text-zinc-100">A calmer way to inspect risk</p></div><span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-bold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />READY</span></div><div className="grid gap-3 sm:grid-cols-2">{[["01", "Sender identity", "Display name + domain"], ["02", "Auth trail", "SPF / DKIM / DMARC"], ["03", "Message intent", "Urgency + harvesting"], ["04", "Destination", "Uncloaked URL target"]].map(([number, title, detail]) => <div key={number} className="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-zinc-800 dark:bg-zinc-950/70"><span className="font-mono text-[10px] font-bold text-emerald-600 dark:text-emerald-400">{number}</span><p className="mt-5 text-sm font-semibold text-slate-900 dark:text-zinc-100">{title}</p><p className="mt-1 text-xs text-slate-500 dark:text-zinc-400">{detail}</p></div>)}</div><div className="mt-4 rounded-2xl bg-zinc-950 p-5 text-zinc-100 dark:bg-black"><div className="flex items-center justify-between"><span className="text-xs font-semibold text-zinc-400">Example assessment</span><span className="font-mono text-xs text-emerald-400">12% risk</span></div><div className="mt-4 h-2 overflow-hidden rounded-full bg-zinc-800"><div className="h-full w-[12%] rounded-full bg-emerald-500" /></div><p className="mt-4 text-sm font-semibold">Safe with verified authentication</p><p className="mt-1 text-xs leading-5 text-zinc-400">Evidence is explained, not hidden behind a black-box verdict.</p></div></div></div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-5 lg:px-8"><StackSpread scrollLength={165} /></section>
+
+      <section className="mx-auto max-w-7xl px-5 pb-20 pt-24 lg:px-8 lg:pb-28"><div className="mx-auto max-w-2xl text-center"><p className="text-xs font-bold uppercase tracking-[.22em] text-emerald-600">Choose your next step</p><h2 className="mt-3 text-3xl font-semibold tracking-[-.04em] text-slate-950 dark:text-white sm:text-5xl">From uncertainty to a safer decision.</h2><p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-300">Start with a scan, or build your phishing instincts with the standards and checklist library.</p></div><div className="mt-10 grid gap-4 md:grid-cols-2"><Link href="/scanner" className="group rounded-3xl border border-emerald-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-emerald-400 hover:shadow-panel focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:border-emerald-900/70 dark:bg-zinc-900 dark:hover:border-emerald-700"><span className="grid h-11 w-11 place-items-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300"><ScanSearch size={22} /></span><h3 className="mt-6 text-xl font-semibold text-slate-950 dark:text-white">Scan a suspicious email</h3><p className="mt-2 max-w-md text-sm leading-6 text-slate-600 dark:text-slate-300">Paste the sender, content, and optional raw headers for a transparent risk report with unshortened links.</p><span className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-emerald-700 dark:text-emerald-300">Open scanner <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span></Link><Link href="/tips" className="group rounded-3xl border border-slate-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-emerald-300 hover:shadow-panel focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-emerald-800"><span className="grid h-11 w-11 place-items-center rounded-xl bg-slate-100 text-slate-700 dark:bg-zinc-800 dark:text-zinc-200"><BookOpenCheck size={22} /></span><h3 className="mt-6 text-xl font-semibold text-slate-950 dark:text-white">Learn the standards</h3><p className="mt-2 max-w-md text-sm leading-6 text-slate-600 dark:text-slate-300">Understand SPF, DKIM, DMARC, global frameworks, current trends, and the checklist for suspicious messages.</p><span className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-emerald-700 dark:text-emerald-300">Explore standards <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span></Link></div><div className="mt-10 grid gap-4 border-t border-slate-200 pt-10 dark:border-zinc-800 md:grid-cols-3">{landingHighlights.map(([Icon, title, copy]) => <div key={title} className="flex gap-3"><Icon className="mt-0.5 shrink-0 text-emerald-500" size={19} aria-hidden="true" /><div><h3 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">{title}</h3><p className="mt-1 text-xs leading-5 text-slate-500 dark:text-zinc-400">{copy}</p></div></div>)}</div></section>
       <SiteFooter />
     </main>
   );
