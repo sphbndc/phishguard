@@ -27,6 +27,7 @@ class UncloakedUrl(BaseModel):
     original_url: str
     final_url: str
     is_suspicious: bool
+    display_text: str | None = None
 
 
 class AnalyzeResponse(BaseModel):
@@ -35,4 +36,3 @@ class AnalyzeResponse(BaseModel):
     flagged_issues: list[FlaggedIssue]
     uncloaked_urls: list[UncloakedUrl]
     educational_advice: str
-

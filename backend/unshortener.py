@@ -4,6 +4,7 @@ import socket
 from urllib.parse import urljoin, urlparse
 
 import requests
+from bs4 import BeautifulSoup
 
 try:
     from .heuristics import is_url_suspicious
@@ -29,6 +30,31 @@ def extract_urls(text: str) -> list[str]:
             seen.add(url)
             urls.append(url)
     return urls[:MAX_URLS]
+
+
+def extract_link_candidates(text: str) -> list[tuple[str, str | None]]:
+    """Return (href, visible URL text) pairs, suppressing duplicate anchor text."""
+    candidates: list[tuple[str, str | None]] = []
+    paired_hrefs: set[str] = set()
+    displayed_urls: set[str] = set()
+    soup = BeautifulSoup(text, "html.parser")
+    for anchor in soup.find_all("a", href=True):
+        href = str(anchor.get("href", "")).strip()
+        if not re.match(r"^https?://", href, re.IGNORECASE):
+            continue
+        visible = " ".join(anchor.get_text(" ").split())
+        visible_url = visible if URL_PATTERN.fullmatch(visible) else None
+        if href not in paired_hrefs:
+            candidates.append((href, visible_url))
+            paired_hrefs.add(href)
+        if visible_url and visible_url != href:
+            displayed_urls.add(visible_url)
+
+    for url in extract_urls(text):
+        if url in paired_hrefs or url in displayed_urls:
+            continue
+        candidates.append((url, None))
+    return candidates[:MAX_URLS]
 
 
 def _assert_public_destination(url: str) -> None:
@@ -71,7 +97,7 @@ def resolve_url(url: str) -> str:
 def analyze_urls(text: str, claimed_brand: str | None = None) -> tuple[list[dict], list[dict[str, str]]]:
     results: list[dict] = []
     issues: list[dict[str, str]] = []
-    for original in extract_urls(text):
+    for original, display_text in extract_link_candidates(text):
         host = (urlparse(original).hostname or "").lower()
         final = original
         if host in SHORTENERS or any(host.endswith(f".{item}") for item in SHORTENERS):
@@ -84,7 +110,13 @@ def analyze_urls(text: str, claimed_brand: str | None = None) -> tuple[list[dict
                     "description": f"Could not safely resolve {original}: {exc}",
                 })
         suspicious = is_url_suspicious(final, claimed_brand)
-        results.append({"original_url": original, "final_url": final, "is_suspicious": suspicious})
+        results.append({"original_url": original, "final_url": final, "is_suspicious": suspicious, "display_text": display_text})
+        if display_text and display_text != final and urlparse(display_text).netloc.lower() != urlparse(final).netloc.lower():
+            issues.append({
+                "category": "Anchor text mismatch",
+                "severity": "Critical",
+                "description": f"The visible link text suggests {urlparse(display_text).netloc or display_text}, but the actual destination is {urlparse(final).netloc or final}.",
+            })
         if suspicious:
             issues.append({
                 "category": "Suspicious link",

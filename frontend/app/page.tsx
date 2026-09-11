@@ -13,7 +13,7 @@ type Result = {
   overall_score: number;
   risk_level: "Safe" | "Moderate Risk" | "Dangerous Phishing";
   flagged_issues: { category: string; severity: Severity; description: string }[];
-  uncloaked_urls: { original_url: string; final_url: string; is_suspicious: boolean }[];
+  uncloaked_urls: { original_url: string; final_url: string; is_suspicious: boolean; display_text?: string | null }[];
   educational_advice: string;
 };
 
@@ -115,7 +115,8 @@ export function ScannerPage() {
       "",
       "UNCLOAKED LINKS",
       ...(report.uncloaked_urls.length ? report.uncloaked_urls.flatMap((url, index) => [
-        `${index + 1}. ${url.original_url}`,
+        `${index + 1}. Display text: ${url.display_text ?? url.original_url}`,
+        `   Original href: ${url.original_url}`,
         `   Final target: ${url.final_url}`,
         `   Verdict: ${url.is_suspicious ? "Suspicious" : "Clear"}`,
       ]) : ["No web links were found in this message."]),
@@ -167,7 +168,7 @@ export function ScannerPage() {
     heading("FLAGGED ISSUES");
     (result.flagged_issues.length ? result.flagged_issues : [{ category: "None", severity: "Informational", description: "No notable anomalies were detected." }]).forEach((issue, index) => paragraph(`${index + 1}. [${issue.severity}] ${issue.category}: ${issue.description}`));
     heading("UNCLOAKED LINKS");
-    (result.uncloaked_urls.length ? result.uncloaked_urls.map((url, index) => `${index + 1}. ${url.original_url} → ${url.final_url} (${url.is_suspicious ? "Suspicious" : "Clear"})`) : ["No web links were found in this message."]).forEach((item) => paragraph(item));
+    (result.uncloaked_urls.length ? result.uncloaked_urls.map((url, index) => `${index + 1}. Display: ${url.display_text ?? url.original_url} | Target: ${url.final_url} (${url.is_suspicious ? "Suspicious" : "Clear"})`) : ["No web links were found in this message."]).forEach((item) => paragraph(item));
     heading("EDUCATIONAL GUIDANCE");
     paragraph(result.educational_advice);
     heading("ADVISORY NOTICE");
@@ -329,12 +330,12 @@ export function ScannerPage() {
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[520px] text-left text-xs">
                       <thead className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500 dark:bg-slate-800 dark:text-slate-300">
-                        <tr><th className="px-4 py-3 font-semibold">Original</th><th className="px-4 py-3 font-semibold">Final target</th><th className="px-4 py-3 font-semibold">Verdict</th></tr>
+                        <tr><th className="px-4 py-3 font-semibold">Display text</th><th className="px-4 py-3 font-semibold">Final target</th><th className="px-4 py-3 font-semibold">Verdict</th></tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {result.uncloaked_urls.map((url, index) => (
                           <tr key={index} className="align-top">
-                            <td className="max-w-40 break-all px-4 py-4 text-slate-500">{url.original_url}</td>
+                            <td className="max-w-40 break-all px-4 py-4 text-slate-500">{url.display_text ?? url.original_url}</td>
                             <td className="max-w-48 break-all px-4 py-4 font-medium text-ink dark:text-slate-100">{url.final_url}</td>
                             <td className="px-4 py-4"><span className={`rounded-full px-2.5 py-1 font-bold ${url.is_suspicious ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300"}`}>{url.is_suspicious ? "Suspicious" : "Clear"}</span></td>
                           </tr>
