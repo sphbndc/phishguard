@@ -39,6 +39,16 @@ standards and security knowledge base is at `/tips`. The frontend uses
 `http://localhost:8000` by default;
 override it with `NEXT_PUBLIC_API_URL` in `frontend/.env.local`.
 
+## API endpoints
+
+- `GET /` — service status and API documentation link
+- `GET /api/health` — hosting-platform health check
+- `POST /api/analyze` — analyze sender, email body, and optional raw headers
+- `GET /docs` — interactive OpenAPI documentation
+
+The scanner also supports light/dark themes, raw-header extraction guidance,
+formatted clipboard reports, and branded PDF report downloads.
+
 ## Deploy with GitHub and Vercel
 
 The Next.js client can be deployed directly from the public GitHub repository:
@@ -59,8 +69,10 @@ uvicorn main:app --host 0.0.0.0 --port $PORT
 ```
 
 After deployment, add the backend's HTTPS URL to Vercel as
-`NEXT_PUBLIC_API_URL` and redeploy the frontend. Configure the backend's CORS
-allowlist for the Vercel domain before production use.
+`NEXT_PUBLIC_API_URL` and redeploy the frontend. Configure the backend's
+`PHISHGUARD_FRONTEND_ORIGIN` environment variable with the Vercel domain (for
+example, `https://phishguard.vercel.app`) before production use. Multiple
+comma-separated origins are supported for preview and production deployments.
 
 ## Important limitations
 
@@ -71,6 +83,7 @@ the supplied raw headers contain a DKIM signature and can be combined with the
 body into a complete message. Do not click or reply to a suspicious message
 solely because a scan reports a low score.
 
-Email HTML is normalized with BeautifulSoup before heuristic and local-model
-analysis. When all three authentication mechanisms explicitly pass and align
-with the visible sender domain, the API applies a hard maximum risk score of 15.
+Email HTML and MIME wrappers are normalized with BeautifulSoup before heuristic
+and local-model analysis. When all three authentication mechanisms explicitly
+pass and align with the visible sender domain, the API applies a hard maximum
+risk score of 12 (Safe).
