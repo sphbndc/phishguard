@@ -99,32 +99,35 @@ export function ScannerPage() {
   }
 
   function formatReport(report: Result) {
+    const generated = new Date().toLocaleString();
+    const issues = report.flagged_issues.length ? report.flagged_issues : [{ category: "No notable anomalies", severity: "Informational" as Severity, description: "No independent phishing indicators were detected." }];
     const lines = [
-      "PHISHGUARD SECURITY REPORT",
-      "Scanned by PhishGuard | Crafted by sphbndc",
-      `Generated: ${new Date().toLocaleString()}`,
-      "=".repeat(64),
-      `RISK ASSESSMENT: ${report.risk_level.toUpperCase()}`,
-      `Phishing risk score: ${report.overall_score}%`,
+      "PHISHGUARD  /  SECURITY SCAN REPORT",
+      "Scanned at phishguard-drab-five.vercel.app",
+      `Generated: ${generated}`,
+      "-".repeat(68),
+      "VERDICT",
+      `${report.risk_level.toUpperCase()}  |  PHISHING RISK: ${report.overall_score}%`,
       "",
-      "FLAGGED ISSUES",
-      ...((report.flagged_issues.length ? report.flagged_issues : [{ category: "None", severity: "Informational", description: "No notable anomalies were detected." }]).flatMap((issue, index) => [
-        `${index + 1}. [${issue.severity}] ${issue.category}`,
+      `EVIDENCE (${issues.length})`,
+      ...issues.flatMap((issue, index) => [
+        `${index + 1}. ${issue.severity.toUpperCase()}  /  ${issue.category}`,
         `   ${issue.description}`,
-      ])),
+      ]),
       "",
-      "UNCLOAKED LINKS",
+      `DESTINATION CHECKS (${report.uncloaked_urls.length})`,
       ...(report.uncloaked_urls.length ? report.uncloaked_urls.flatMap((url, index) => [
-        `${index + 1}. Display text: ${url.display_text ?? url.original_url}`,
-        `   Original href: ${url.original_url}`,
-        `   Final target: ${url.final_url}`,
-        `   Verdict: ${url.is_suspicious ? "Suspicious" : "Clear"}`,
+        `${index + 1}. ${url.is_suspicious ? "SUSPICIOUS" : "CLEAR"}`,
+        `   Display: ${url.display_text ?? url.original_url}`,
+        `   Target:  ${url.final_url}`,
       ]) : ["No web links were found in this message."]),
       "",
-      "EDUCATIONAL GUIDANCE",
+      "GUIDANCE",
       report.educational_advice,
       "",
-      "This report is an advisory security assessment generated locally by PhishGuard. Verify high-impact requests through an independent channel.",
+      "ADVISORY",
+      "Generated locally by PhishGuard. Verify high-impact requests through an independent channel.",
+      "This report is informational and does not guarantee message safety.",
     ];
     return lines.join("\n");
   }
@@ -150,31 +153,45 @@ export function ScannerPage() {
         addWatermark();
       }
     };
+    const bodyWidth = pageWidth - margin * 2;
+    const riskColor: [number, number, number] = result.overall_score >= 65 ? [220, 38, 38] : result.overall_score >= 30 ? [217, 119, 6] : [5, 150, 105];
+    const section = (title: string) => { ensureSpace(30); pdf.setTextColor(5, 150, 105); pdf.setFont("helvetica", "bold"); pdf.setFontSize(10); pdf.text(title, margin, y); y += 16; };
+    const paragraph = (text: string, color: [number, number, number] = [51, 65, 85]) => { const wrapped = pdf.splitTextToSize(text, bodyWidth - 24); ensureSpace(wrapped.length * 13 + 16); pdf.setTextColor(...color); pdf.setFont("helvetica", "normal"); pdf.setFontSize(9.5); pdf.text(wrapped, margin + 12, y, { lineHeightFactor: 1.35 }); y += wrapped.length * 13 + 12; };
+    const issueCard = (category: string, severity: Severity, description: string) => {
+      const wrapped = pdf.splitTextToSize(description, bodyWidth - 34);
+      ensureSpace(wrapped.length * 12 + 35);
+      const fill: [number, number, number] = severity === "Critical" ? [254, 242, 242] : severity === "Warning" ? [255, 251, 235] : [248, 250, 252];
+      const accent: [number, number, number] = severity === "Critical" ? [185, 28, 28] : severity === "Warning" ? [180, 83, 9] : [71, 85, 105];
+      pdf.setFillColor(...fill); pdf.setDrawColor(226, 232, 240); pdf.roundedRect(margin, y - 10, bodyWidth, wrapped.length * 12 + 27, 6, 6, "FD");
+      pdf.setTextColor(...accent); pdf.setFont("helvetica", "bold"); pdf.setFontSize(8.5); pdf.text(`${severity.toUpperCase()}  /  ${category}`, margin + 10, y + 3);
+      pdf.setTextColor(71, 85, 105); pdf.setFont("helvetica", "normal"); pdf.setFontSize(8.5); pdf.text(wrapped, margin + 10, y + 16, { lineHeightFactor: 1.3 });
+      y += wrapped.length * 12 + 25;
+    };
     addWatermark();
-    pdf.setFillColor(16, 185, 129);
-    pdf.roundedRect(margin, y - 24, pageWidth - margin * 2, 58, 10, 10, "F");
-    pdf.setTextColor(3, 7, 18);
+    pdf.setFillColor(15, 23, 42);
+    pdf.roundedRect(margin, y - 24, bodyWidth, 76, 10, 10, "F");
+    pdf.setFillColor(16, 185, 129); pdf.roundedRect(margin, y - 24, 8, 76, 4, 4, "F");
+    pdf.setTextColor(248, 250, 252);
     pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(18);
-    pdf.text("PHISHGUARD SECURITY REPORT", margin + 18, y + 2);
+    pdf.setFontSize(16);
+    pdf.text("PHISHGUARD SECURITY REPORT", margin + 20, y + 1);
     pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(9);
-    pdf.text("Scanned by PhishGuard | Crafted by sphbndc", margin + 18, y + 20);
-    y += 62;
-    const heading = (text: string) => { ensureSpace(32); pdf.setTextColor(5, 150, 105); pdf.setFont("helvetica", "bold"); pdf.setFontSize(11); pdf.text(text, margin, y); y += 18; };
-    const paragraph = (text: string, color: [number, number, number] = [51, 65, 85]) => { const wrapped = pdf.splitTextToSize(text, pageWidth - margin * 2); ensureSpace(wrapped.length * 14 + 8); pdf.setTextColor(...color); pdf.setFont("helvetica", "normal"); pdf.setFontSize(10); pdf.text(wrapped, margin, y, { lineHeightFactor: 1.35 }); y += wrapped.length * 14 + 8; };
-    heading("RISK ASSESSMENT");
-    paragraph(`${result.risk_level} — Phishing risk score: ${result.overall_score}%`, result.overall_score >= 65 ? [185, 28, 28] : result.overall_score >= 30 ? [180, 83, 9] : [5, 150, 105]);
-    heading("FLAGGED ISSUES");
-    (result.flagged_issues.length ? result.flagged_issues : [{ category: "None", severity: "Informational", description: "No notable anomalies were detected." }]).forEach((issue, index) => paragraph(`${index + 1}. [${issue.severity}] ${issue.category}: ${issue.description}`));
-    heading("UNCLOAKED LINKS");
-    (result.uncloaked_urls.length ? result.uncloaked_urls.map((url, index) => `${index + 1}. Display: ${url.display_text ?? url.original_url} | Target: ${url.final_url} (${url.is_suspicious ? "Suspicious" : "Clear"})`) : ["No web links were found in this message."]).forEach((item) => paragraph(item));
-    heading("EDUCATIONAL GUIDANCE");
+    pdf.setFontSize(9); pdf.setTextColor(203, 213, 225); pdf.text("Local-first email threat analysis", margin + 20, y + 20);
+    pdf.setFontSize(8); pdf.text(`Generated ${new Date().toLocaleString()}`, margin + 20, y + 36);
+    pdf.setFillColor(...riskColor); pdf.roundedRect(pageWidth - margin - 112, y - 8, 96, 25, 12, 12, "F"); pdf.setTextColor(255, 255, 255); pdf.setFont("helvetica", "bold"); pdf.setFontSize(9); pdf.text(`${result.overall_score}%  ${result.risk_level === "Dangerous Phishing" ? "DANGEROUS" : result.risk_level === "Moderate Risk" ? "MODERATE" : "SAFE"}`, pageWidth - margin - 104, y + 8);
+    y += 72;
+    section("RISK ASSESSMENT");
+    paragraph(`Verdict: ${result.risk_level}. Combined phishing risk score: ${result.overall_score}%.`, riskColor);
+    section("EVIDENCE");
+    (result.flagged_issues.length ? result.flagged_issues : [{ category: "No notable anomalies", severity: "Informational" as Severity, description: "No independent phishing indicators were detected." }]).forEach((issue) => issueCard(issue.category, issue.severity, issue.description));
+    section("DESTINATION CHECKS");
+    (result.uncloaked_urls.length ? result.uncloaked_urls.map((url) => `Display: ${url.display_text ?? url.original_url}\nTarget: ${url.final_url}\nVerdict: ${url.is_suspicious ? "SUSPICIOUS" : "CLEAR"}`) : ["No web links were found in this message."]).forEach((item) => paragraph(item));
+    section("GUIDANCE");
     paragraph(result.educational_advice);
-    heading("ADVISORY NOTICE");
-    paragraph("This report is an advisory security assessment generated locally by PhishGuard. Verify high-impact requests through an independent channel.");
+    section("ADVISORY NOTICE");
+    paragraph("Generated locally by PhishGuard. Verify high-impact requests through an independent channel. This report is informational and does not guarantee message safety.");
     const pages = pdf.getNumberOfPages();
-    for (let page = 1; page <= pages; page += 1) { pdf.setPage(page); pdf.setTextColor(100, 116, 139); pdf.setFontSize(8); pdf.text(`PhishGuard • Confidential scan report • ${page}/${pages}`, margin, pageHeight - 24); }
+    for (let page = 1; page <= pages; page += 1) { pdf.setPage(page); pdf.setTextColor(100, 116, 139); pdf.setFontSize(8); pdf.text(`PhishGuard | Confidential scan report | ${page}/${pages}`, margin, pageHeight - 24); pdf.text("phishguard-drab-five.vercel.app", pageWidth - margin, pageHeight - 24, { align: "right" }); }
     pdf.save(`phishguard-report-${new Date().toISOString().slice(0, 10)}.pdf`);
   }
 
