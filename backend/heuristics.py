@@ -170,11 +170,14 @@ def analyze_heuristics(sender: str, body: str) -> HeuristicResult:
         })
 
     if PAYMENT_REQUEST_PATTERN.search(lowered):
-        score += 28
+        # A financial demand is concerning, but without corroborating evidence
+        # (spoofed identity, suspicious URL, credentials, or attachment) it is
+        # a warning rather than proof of phishing.
+        score += 15
         issues.append({
             "category": "Direct money request",
-            "severity": "Critical",
-            "description": "Demands or solicits money through the message. Unexpected payment demands should be verified through an independent, trusted channel.",
+            "severity": "Warning",
+            "description": "Demands or solicits money through the message. Verify unexpected payment requests through an independent, trusted channel.",
         })
 
     if LINK_ACTION_PATTERN.search(lowered) and not re.search(r"https?://|www\.", lowered):

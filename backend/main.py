@@ -162,6 +162,18 @@ def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
             "description": "No links, authentication failures, impersonation, urgency, or sensitive-data requests were detected; the model-only result is treated conservatively.",
         })
 
+    # A standalone financial demand should prompt verification, not be treated
+    # as confirmed phishing. Escalation remains available when a critical
+    # corroborating signal or suspicious destination is present.
+    has_money_request = any(issue["category"] == "Direct money request" for issue in issues)
+    has_critical_evidence = any(
+        issue["severity"] == "Critical" and issue["category"] != "Language model signal"
+        for issue in issues
+    )
+    has_suspicious_url = any(url["is_suspicious"] for url in urls)
+    if has_money_request and not has_critical_evidence and not has_suspicious_url and overall > 55:
+        overall = 55
+
     if authentication_gate:
         overall = min(overall, 12)
         print("[AUTH OVERRIDE] DMARC/SPF Passed. Capping risk score to 12%", flush=True)
