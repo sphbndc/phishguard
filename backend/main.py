@@ -85,7 +85,7 @@ def _educational_advice(brand: str | None, issues: list[dict[str, str]], score: 
 @app.post("/api/analyze", response_model=AnalyzeResponse)
 def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
     # Gatekeeper check is deliberately independent of model and heuristic output.
-    authentication_gate = all(
+    explicit_auth_pass = all(
         re.search(rf"\b{mechanism}\s*=\s*pass\b", payload.header, re.IGNORECASE)
         for mechanism in ("dmarc", "spf", "dkim")
     )
@@ -94,6 +94,9 @@ def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
     # Keep original href targets for link inspection; HTML is never passed to NLP or keyword rules.
     urls, url_issues = analyze_urls(payload.body, heuristic.claimed_brand)
     header_score, header_issues, authentication_override = analyze_headers(payload.header, payload.body, heuristic.sender_domain)
+    # Authentication is a hard safety gate only when the parser also confirms
+    # that the authenticated domains align with the visible sender domain.
+    authentication_gate = explicit_auth_pass and authentication_override
     ml_score, _ml_error = phishing_probability(f"From: {payload.sender}\n\n{clean_body}")
 
     issues = heuristic.issues + url_issues + header_issues
