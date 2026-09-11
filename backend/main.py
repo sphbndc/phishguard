@@ -147,6 +147,21 @@ def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
             "description": "The message uses ordinary order, delivery, or customer-support language without a deterministic phishing signal; the statistical score was conservatively reduced.",
         })
 
+    # Do not let an isolated, overconfident classifier result make a clean
+    # message Moderate Risk. For model-only evidence, deterministic controls
+    # remain the source of escalation and the statistical signal is advisory.
+    if rule_score == 0 and not deterministic_issues and not commerce_context and not any(url["is_suspicious"] for url in urls) and overall > 28:
+        overall = 28
+        for issue in issues:
+            if issue["category"] == "Language model signal":
+                issue["severity"] = "Informational"
+                issue["description"] += " No independent phishing indicators supported this isolated model signal."
+        issues.append({
+            "category": "Low-signal message",
+            "severity": "Informational",
+            "description": "No links, authentication failures, impersonation, urgency, or sensitive-data requests were detected; the model-only result is treated conservatively.",
+        })
+
     if authentication_gate:
         overall = min(overall, 12)
         print("[AUTH OVERRIDE] DMARC/SPF Passed. Capping risk score to 12%", flush=True)
