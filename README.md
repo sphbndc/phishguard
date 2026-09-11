@@ -26,7 +26,7 @@ The model is loaded lazily on the first scan. Set `PHISHGUARD_MODEL` to another
 locally available Hugging Face sequence-classification model if desired. Set
 `TRANSFORMERS_OFFLINE=1` to enforce cache-only operation.
 
-## Run the frontend
+## Run the frontend locally
 
 ```bash
 cd frontend
@@ -34,10 +34,14 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000. The scanner is available at `/` and `/scanner`; the
-standards and security knowledge base is at `/tips`. The frontend uses
-`http://localhost:8000` by default;
-override it with `NEXT_PUBLIC_API_URL` in `frontend/.env.local`.
+Open http://localhost:3000. This is the local development version; it does not
+replace the deployed site. The scanner is available at `/` and `/scanner`; the
+standards and security knowledge base is at `/tips`. Locally, the frontend uses
+`http://localhost:8000` for the API by default; override it with
+`NEXT_PUBLIC_API_URL` in `frontend/.env.local` when testing another backend.
+
+The live frontend is available at:
+https://phishguard-drab-five.vercel.app
 
 ## API endpoints
 
