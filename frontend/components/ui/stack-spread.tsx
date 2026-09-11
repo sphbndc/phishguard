@@ -19,7 +19,7 @@ import {
   useTransform,
   type MotionValue,
 } from "motion/react";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type SignalCard = {
   title: string;
@@ -42,19 +42,21 @@ const SIGNALS: SignalCard[] = [
   { title: "Verdict", detail: "Action guidance", icon: TriangleAlert, tone: "from-teal-300 to-teal-600", x: 13, y: 39, rotate: -4 },
 ];
 
-function SignalTile({ signal, progress, index, reduced }: { signal: SignalCard; progress: MotionValue<number>; index: number; reduced: boolean }) {
+function SignalTile({ signal, progress, index, reduced, mobile }: { signal: SignalCard; progress: MotionValue<number>; index: number; reduced: boolean; mobile: boolean }) {
   const Icon = signal.icon;
-  const translate = useTransform(progress, (value) => `translate(-50%, -50%) translate(${signal.x * value}vw, ${signal.y * value}vh)`);
+  const targetX = signal.x * (mobile ? 0.58 : 1);
+  const targetY = signal.y * (mobile ? 0.72 : 1);
+  const translate = useTransform(progress, (value) => `translate(-50%, -50%) translate(${targetX * value}vw, ${targetY * value}vh)`);
   const rotate = useTransform(progress, [0, 0.28, 1], [signal.rotate, signal.rotate * 0.15, signal.rotate]);
   const scale = useTransform(progress, [0, 0.25, 1], [0.86, 1, 1]);
 
   return (
     <motion.article
-      className={`absolute left-1/2 top-1/2 h-32 w-48 rounded-2xl border border-white/20 bg-gradient-to-br ${signal.tone} p-4 text-zinc-950 shadow-2xl shadow-black/30 sm:h-40 sm:w-60 sm:p-5`}
+      className={`absolute left-1/2 top-1/2 h-28 w-40 rounded-2xl border border-white/20 bg-gradient-to-br ${signal.tone} p-3.5 text-zinc-950 shadow-2xl shadow-black/30 sm:h-40 sm:w-60 sm:p-5`}
       style={{ transform: translate, rotate: reduced ? 0 : rotate, scale, zIndex: index + 1 }}
     >
       <div className="flex items-start justify-between"><span className="grid h-9 w-9 place-items-center rounded-xl bg-white/35"><Icon size={18} /></span><span className="font-mono text-[10px] font-bold uppercase tracking-widest opacity-60">0{index + 1}</span></div>
-      <h3 className="mt-6 text-lg font-bold tracking-tight sm:text-xl">{signal.title}</h3>
+      <h3 className="mt-5 text-base font-bold tracking-tight sm:mt-6 sm:text-xl">{signal.title}</h3>
       <p className="mt-1 text-xs font-medium opacity-70">{signal.detail}</p>
     </motion.article>
   );
@@ -62,7 +64,15 @@ function SignalTile({ signal, progress, index, reduced }: { signal: SignalCard; 
 
 export default function StackSpread({ scrollLength = 210 }: { scrollLength?: number }) {
   const stageRef = useRef<HTMLDivElement>(null);
+  const [mobile, setMobile] = useState(false);
   const reduced = useReducedMotion() === true;
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 640px)");
+    const update = () => setMobile(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
   const { scrollYProgress } = useScroll({ target: stageRef, offset: ["start start", "end end"] });
   const progress = useSpring(scrollYProgress, { stiffness: 80, damping: 24, mass: 0.7 });
   const copyOpacity = useTransform(progress, [0.18, 0.5], [0, 1]);
@@ -79,7 +89,7 @@ export default function StackSpread({ scrollLength = 210 }: { scrollLength?: num
           <p className="mx-auto mt-5 max-w-md text-sm leading-6 text-zinc-400 sm:text-base">Scroll to separate the layers PhishGuard checks before it recommends your next safe action.</p>
         </motion.div>
         <div className="absolute inset-0 z-10">
-          {SIGNALS.map((signal, index) => <SignalTile key={signal.title} signal={signal} progress={progress} index={index} reduced={reduced} />)}
+          {SIGNALS.map((signal, index) => <SignalTile key={signal.title} signal={signal} progress={progress} index={index} reduced={reduced} mobile={mobile} />)}
         </div>
         <motion.p className="absolute bottom-8 z-30 text-[10px] font-bold uppercase tracking-[.25em] text-emerald-300/70" style={{ opacity: hintOpacity }}>Scroll to inspect</motion.p>
       </div>
