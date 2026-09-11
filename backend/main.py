@@ -100,8 +100,15 @@ def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
     urls, url_issues = analyze_urls(payload.body, heuristic.claimed_brand)
     header_score, header_issues, authentication_override = analyze_headers(payload.header, payload.body, heuristic.sender_domain)
     # Authentication is a hard safety gate only when the parser also confirms
-    # that the authenticated domains align with the visible sender domain.
-    authentication_gate = explicit_auth_pass and authentication_override
+    # that the authenticated domains align with the visible sender domain. A
+    # confirmed malicious destination remains a higher-priority safety signal:
+    # SPF/DKIM/DMARC cannot make a spoofed outbound link safe.
+    critical_link_evidence = any(
+        issue["severity"] == "Critical"
+        and issue["category"] in {"Suspicious link", "Anchor text mismatch"}
+        for issue in url_issues
+    )
+    authentication_gate = explicit_auth_pass and authentication_override and not critical_link_evidence
     ml_score, _ml_error = phishing_probability(f"From: {payload.sender}\n\n{clean_body}")
 
     issues = heuristic.issues + url_issues + header_issues
