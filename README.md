@@ -22,14 +22,13 @@ pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 ```
 
-The compact phishing-trained model `lleratodev/720-bert-mini-phishing-fine-tune`
-is available as an optional local signal. Set `PHISHGUARD_ENABLE_NLP=1` to load
-it; otherwise the API uses deterministic authentication, sender, language, and
-URL checks without importing PyTorch (the recommended setting for Render Free's
-memory limit). Set `PHISHGUARD_MODEL` to another locally available Hugging Face
-sequence-classification model if desired. Set `PHISHGUARD_TORCH_THREADS` to
-tune CPU thread usage on larger instances, or set `TRANSFORMERS_OFFLINE=1` to
-enforce cache-only operation.
+The local NLP signal uses a compact ONNX phishing-email model and runs one
+inference at a time. Set `PHISHGUARD_ENABLE_NLP=0` to disable it if a host is
+especially constrained; deterministic authentication, sender, language, and
+URL checks remain active. The model and tokenizer are cached under
+`PHISHGUARD_MODEL_DIR` (default `/tmp/phishguard-model`) and can be overridden
+with `PHISHGUARD_ONNX_MODEL_URL`, `PHISHGUARD_ONNX_TOKENIZER_URL`, and
+`PHISHGUARD_ONNX_CONFIG_URL`. Set `PHISHGUARD_ORT_THREADS` to tune CPU usage.
 
 ## Run the frontend locally
 
