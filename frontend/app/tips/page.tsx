@@ -1,6 +1,7 @@
 ﻿import { AlertTriangle, BadgeCheck, BookOpen, ExternalLink, Fingerprint, ListChecks, MailCheck, Newspaper, ShieldCheck } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import StackSpread from "@/components/ui/stack-spread";
 
 const sources = {
   apwg: "https://apwg.org/trendsreports",
@@ -43,6 +44,8 @@ export default function TipsPage() {
       <article className="rounded-3xl border border-slate-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900"><p className="font-mono text-3xl font-bold text-emerald-500">+33%</p><h3 className="mt-3 font-semibold text-slate-950 dark:text-white">wire-transfer BEC growth</h3><p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">APWG reported wire-transfer BEC attacks increased quarter-over-quarter in Q1 2025.</p><p className="mt-4 text-xs"><SourceLink href={sources.apwg}>APWG trend data</SourceLink></p></article>
       <article className="rounded-3xl border border-slate-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900"><p className="font-mono text-3xl font-bold text-emerald-500">16%</p><h3 className="mt-3 font-semibold text-slate-950 dark:text-white">of breaches in the social-engineering pattern</h3><p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">Verizon&rsquo;s 2026 DBIR describes social engineering as a major breach pattern and reports 5,302 related incidents.</p><p className="mt-4 text-xs"><SourceLink href={sources.verizon}>Verizon 2026 DBIR</SourceLink></p></article>
     </div><p className="mt-4 max-w-3xl text-xs leading-5 text-slate-500">These are observed reports, not a universal probability of clicking or compromise. CISA recommends phishing-resistant MFA as a defense-in-depth control; <SourceLink href={sources.cisa}>CISA guidance</SourceLink>.</p></section>
+
+    <section className="mt-16"><StackSpread scrollLength={185} /></section>
 
     <section className="mt-16"><div className="mb-6 flex items-center gap-3"><BookOpen className="text-emerald-500" size={20} /><h2 className="text-2xl font-semibold text-slate-950 dark:text-white">Global email authentication standards</h2></div><div className="grid gap-4 md:grid-cols-3">{standards.map(({ icon: Icon, code, title, copy, href, ref }) => <article key={code} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><div className="mb-7 flex items-center justify-between"><span className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"><Icon size={20} /></span><span className="font-mono text-xs font-bold tracking-widest text-emerald-600">{code}</span></div><h3 className="text-lg font-semibold text-slate-950 dark:text-white">{title}</h3><p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{copy}</p><p className="mt-5 text-xs"><SourceLink href={href}>{ref}</SourceLink></p></article>)}</div></section>
 
