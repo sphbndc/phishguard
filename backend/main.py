@@ -193,6 +193,12 @@ def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
         overall = min(overall, 12)
         print("[AUTH OVERRIDE] DMARC/SPF Passed. Capping risk score to 12%", flush=True)
 
+    # A destination that is confirmed suspicious or mismatched with its
+    # visible anchor text is decisive evidence. Keep the verdict Dangerous
+    # rather than allowing model weighting to dilute a critical link finding.
+    if critical_link_evidence:
+        overall = max(overall, 70)
+
     if overall >= 65:
         risk = "Dangerous Phishing"
     elif overall >= 30:
