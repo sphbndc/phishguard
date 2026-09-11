@@ -1,0 +1,128 @@
+import logging
+import re
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+try:
+    from .header_parser import analyze_headers
+    from .heuristics import BRAND_DOMAINS, analyze_heuristics
+    from .nlp_engine import clean_email_text, phishing_probability
+    from .schemas import AnalyzeRequest, AnalyzeResponse
+    from .unshortener import analyze_urls
+except ImportError:  # supports `uvicorn main:app` from inside backend/
+    from header_parser import analyze_headers
+    from heuristics import BRAND_DOMAINS, analyze_heuristics
+    from nlp_engine import clean_email_text, phishing_probability
+    from schemas import AnalyzeRequest, AnalyzeResponse
+    from unshortener import analyze_urls
+
+logging.basicConfig(level=logging.INFO)
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    yield
+
+
+app = FastAPI(
+    title="PhishGuard API",
+    version="1.0.0",
+    description="Local-first phishing analysis API",
+    lifespan=lifespan,
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
+)
+
+
+@app.exception_handler(Exception)
+async def unexpected_error_handler(_, exc: Exception):
+    logging.getLogger(__name__).exception("Unhandled API error", exc_info=exc)
+    return JSONResponse(status_code=500, content={"detail": "Analysis failed unexpectedly"})
+
+
+@app.get("/api/health")
+def health() -> dict[str, str]:
+    return {"status": "ok"}
+
+
+def _educational_advice(brand: str | None, issues: list[dict[str, str]], score: int) -> str:
+    if brand:
+        domains = ", ".join(sorted(BRAND_DOMAINS[brand]))
+        identity = f"A legitimate {brand.title()} message should use an official domain such as {domains}"
+    else:
+        identity = "A legitimate message should come from a domain you already know and can verify independently"
+    categories = {issue["category"] for issue in issues if issue["severity"] != "Informational"}
+    reasons = ", ".join(sorted(categories)[:4])
+    if score >= 65:
+        action = "Do not click links, download attachments, reply, or provide information. Contact the organization through its official app or a bookmarked website."
+    elif score >= 30:
+        action = "Verify the request using a trusted phone number or official website before interacting with the message."
+    else:
+        action = "No strong phishing pattern was found, but independently verify unexpected requests and never share passwords or one-time codes."
+    detail = f" The scan was influenced by: {reasons}." if reasons else ""
+    return f"{identity}, address you by expected details, and avoid asking for secrets by email.{detail} {action}"
+
+
+@app.post("/api/analyze", response_model=AnalyzeResponse)
+def analyze(payload: AnalyzeRequest) -> AnalyzeResponse:
+    # Gatekeeper check is deliberately independent of model and heuristic output.
+    authentication_gate = all(
+        re.search(rf"\b{mechanism}\s*=\s*pass\b", payload.header, re.IGNORECASE)
+        for mechanism in ("dmarc", "spf", "dkim")
+    )
+    clean_body = clean_email_text(payload.body)
+    heuristic = analyze_heuristics(payload.sender, clean_body)
+    # Keep original href targets for link inspection; HTML is never passed to NLP or keyword rules.
+    urls, url_issues = analyze_urls(payload.body, heuristic.claimed_brand)
+    header_score, header_issues, authentication_override = analyze_headers(payload.header, payload.body, heuristic.sender_domain)
+    ml_score, _ml_error = phishing_probability(f"From: {payload.sender}\n\n{clean_body}")
+
+    issues = heuristic.issues + url_issues + header_issues
+    url_score = min(24, sum(12 for url in urls if url["is_suspicious"]))
+    # A complete aligned authentication pass is a safety bonus, not merely a neutral signal.
+    rule_score = max(0, min(100, heuristic.score + header_score + url_score - (40 if authentication_override else 0)))
+    if ml_score is None:
+        issues.append({
+            "category": "Local AI classifier",
+            "severity": "Informational",
+            "description": "The local model was unavailable, so the score uses deterministic security checks only.",
+        })
+        overall = rule_score
+    else:
+        # Independent controls retain influence even when the statistical model is uncertain.
+        weighted_score = round(ml_score * 0.55 + rule_score * 0.45)
+        deterministic_floor = min(90, round(rule_score * 0.8))
+        overall = min(100, max(weighted_score, deterministic_floor))
+        if ml_score >= 65:
+            issues.append({
+                "category": "Language model signal",
+                "severity": "Warning" if ml_score < 80 else "Critical",
+                "description": f"The local phishing classifier assigned a {ml_score}% phishing probability.",
+            })
+
+    if authentication_gate:
+        overall = min(overall, 12)
+        print("[AUTH OVERRIDE] DMARC/SPF Passed. Capping risk score to 12%", flush=True)
+
+    if overall >= 65:
+        risk = "Dangerous Phishing"
+    elif overall >= 30:
+        risk = "Moderate Risk"
+    else:
+        risk = "Safe"
+
+    return AnalyzeResponse(
+        overall_score=overall,
+        risk_level=risk,
+        flagged_issues=issues,
+        uncloaked_urls=urls,
+        educational_advice=_educational_advice(heuristic.claimed_brand, issues, overall),
+    )
