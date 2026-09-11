@@ -28,6 +28,15 @@ DATA_PATTERNS = {
     r"\b(?:seed phrase|recovery phrase|private key)\b": "wallet recovery secret",
 }
 
+PAYMENT_REQUEST_PATTERN = re.compile(
+    r"\b(?:give|send|transfer|pay|wire|deposit|refund)\b.{0,45}\b(?:money|cash|funds|payment|dollars?|€|£|₱)\b",
+    re.IGNORECASE,
+)
+LINK_ACTION_PATTERN = re.compile(
+    r"\b(?:send|click|open|follow|use)\b.{0,35}\b(?:this|the)\s+link\b",
+    re.IGNORECASE,
+)
+
 BRAND_DOMAINS = {
     "paypal": {"paypal.com"},
     "microsoft": {"microsoft.com", "office.com", "outlook.com"},
@@ -158,6 +167,22 @@ def analyze_heuristics(sender: str, body: str) -> HeuristicResult:
             "category": "Unusual payment request",
             "severity": "Critical",
             "description": "Requests a hard-to-reverse payment method often used in social-engineering scams.",
+        })
+
+    if PAYMENT_REQUEST_PATTERN.search(lowered):
+        score += 28
+        issues.append({
+            "category": "Direct money request",
+            "severity": "Critical",
+            "description": "Demands or solicits money through the message. Unexpected payment demands should be verified through an independent, trusted channel.",
+        })
+
+    if LINK_ACTION_PATTERN.search(lowered) and not re.search(r"https?://|www\.", lowered):
+        score += 12
+        issues.append({
+            "category": "Unspecified link action",
+            "severity": "Warning",
+            "description": "Directs the recipient to use an unspecified link without providing a verifiable destination.",
         })
 
     return HeuristicResult(min(score, 100), issues, sender_domain, brand)
