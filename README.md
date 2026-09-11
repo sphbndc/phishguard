@@ -51,6 +51,8 @@ formatted clipboard reports, and branded PDF report downloads.
 
 ## Deploy with GitHub and Vercel
 
+Live frontend: [https://phishguard-drab-five.vercel.app](https://phishguard-drab-five.vercel.app)
+
 The Next.js client can be deployed directly from the public GitHub repository:
 
 1. Sign in at [vercel.com](https://vercel.com) with GitHub and choose
@@ -70,8 +72,8 @@ uvicorn main:app --host 0.0.0.0 --port $PORT
 
 After deployment, add the backend's HTTPS URL to Vercel as
 `NEXT_PUBLIC_API_URL` and redeploy the frontend. Configure the backend's
-`PHISHGUARD_FRONTEND_ORIGIN` environment variable with the Vercel domain (for
-example, `https://phishguard.vercel.app`) before production use. Multiple
+`PHISHGUARD_FRONTEND_ORIGIN` environment variable with the Vercel domain
+`https://phishguard-drab-five.vercel.app` before production use. Multiple
 comma-separated origins are supported for preview and production deployments.
 
 ## Important limitations
