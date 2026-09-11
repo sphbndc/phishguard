@@ -204,8 +204,8 @@ export function ScannerPage() {
         </div>
 
         <form onSubmit={submit} className="overflow-visible rounded-3xl border border-slate-200 bg-white shadow-panel backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900">
-          <div className="grid lg:grid-cols-[.72fr_1.28fr]">
-            <div className="flex flex-col border-b border-slate-200 p-6 lg:border-b-0 lg:border-r lg:p-8 dark:border-zinc-800">
+          <div className="grid min-w-0 lg:grid-cols-[.72fr_1.28fr]">
+            <div className="flex min-w-0 flex-col gap-6 border-b border-slate-200 p-4 sm:p-6 lg:gap-0 lg:border-b-0 lg:border-r lg:p-8 dark:border-zinc-800">
               <label htmlFor="sender" className="mb-3 block text-sm font-semibold">Sender identity</label>
               <input
                 id="sender"
@@ -215,16 +215,16 @@ export function ScannerPage() {
                 value={sender}
                 onChange={(e) => setSender(e.target.value)}
                 placeholder="security@paypa1.com"
-                className="w-full rounded-xl border border-slate-300 bg-slate-100 px-4 py-3.5 text-sm text-slate-900 transition placeholder:text-slate-500 hover:border-slate-400 focus:border-slate-500 focus:bg-slate-100 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-400 dark:focus:border-zinc-500 dark:focus:bg-zinc-800"
+                className="w-full min-w-0 rounded-xl border border-slate-300 bg-slate-100 px-4 py-3.5 text-sm text-slate-900 transition placeholder:text-slate-500 hover:border-slate-400 focus:border-slate-500 focus:bg-slate-100 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-400 dark:focus:border-zinc-500 dark:focus:bg-zinc-800"
               />
-              <div className="mt-auto rounded-2xl bg-slate-950 p-5 pt-8 text-white dark:bg-emerald-950/60">
+              <div className="mt-0 rounded-2xl bg-slate-950 p-5 text-white dark:bg-emerald-950/60 lg:mt-auto lg:pt-8">
                 <ShieldCheck className="mb-5 h-8 w-8 text-emerald-400" />
                 <p className="text-sm font-semibold">Privacy by design</p>
                 <p className="mt-2 text-xs leading-5 text-white/65">Your email is processed by your own backend and local open-source model. PhishGuard does not store scan contents.</p>
               </div>
             </div>
 
-            <div className="p-6 lg:p-8">
+            <div className="min-w-0 p-4 sm:p-6 lg:p-8">
               <div className="mb-3 flex items-center justify-between gap-4">
                 <label htmlFor="body" className="text-sm font-semibold">Email content</label>
                 <span className="text-xs text-slate-400">Plain text or pasted rich text</span>
@@ -237,7 +237,7 @@ export function ScannerPage() {
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
                 placeholder={"Dear customer,\n\nWe detected unusual activity. Verify now to prevent your account from being suspended..."}
-                className="w-full resize-y rounded-xl border border-slate-300 bg-slate-100 px-4 py-4 text-sm leading-6 text-slate-900 transition placeholder:text-slate-500 hover:border-slate-400 focus:border-slate-500 focus:bg-slate-100 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-400 dark:focus:border-zinc-500 dark:focus:bg-zinc-800"
+                className="block w-full min-w-0 resize-y rounded-xl border border-slate-300 bg-slate-100 px-4 py-4 text-sm leading-6 text-slate-900 transition placeholder:text-slate-500 hover:border-slate-400 focus:border-slate-500 focus:bg-slate-100 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-400 dark:focus:border-zinc-500 dark:focus:bg-zinc-800"
               />
 
               <div className="relative mt-4 flex flex-wrap items-center justify-between gap-3">
