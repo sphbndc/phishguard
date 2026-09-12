@@ -176,7 +176,7 @@ export function ScannerPage() {
     pdf.setFontSize(16);
     pdf.text("PHISHGUARD SECURITY REPORT", margin + 20, y + 1);
     pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(9); pdf.setTextColor(203, 213, 225); pdf.text("Local-first email threat analysis", margin + 20, y + 20);
+    pdf.setFontSize(9); pdf.setTextColor(203, 213, 225); pdf.text("Privacy-focused email threat analysis", margin + 20, y + 20);
     pdf.setFontSize(8); pdf.text(`Generated ${new Date().toLocaleString()}`, margin + 20, y + 36);
     pdf.setFillColor(...riskColor); pdf.roundedRect(pageWidth - margin - 112, y - 8, 96, 25, 12, 12, "F"); pdf.setTextColor(255, 255, 255); pdf.setFont("helvetica", "bold"); pdf.setFontSize(9); pdf.text(`${result.overall_score}%  ${result.risk_level === "Dangerous Phishing" ? "DANGEROUS" : result.risk_level === "Moderate Risk" ? "MODERATE" : "SAFE"}`, pageWidth - margin - 104, y + 8);
     y += 72;
@@ -238,7 +238,7 @@ export function ScannerPage() {
               <div className="mt-0 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-slate-900 dark:border-emerald-900/60 dark:bg-emerald-950/60 dark:text-white lg:mt-auto lg:pt-8">
                 <ShieldCheck className="mb-5 h-8 w-8 text-emerald-400" />
                 <p className="text-sm font-semibold">Privacy by design</p>
-                <p className="mt-2 text-xs leading-5 text-slate-600 dark:text-white/65">Your email is processed by your own backend and local open-source model. PhishGuard does not store scan contents.</p>
+                <p className="mt-2 text-xs leading-5 text-slate-600 dark:text-white/65">Your email is processed by the PhishGuard backend and open-source model. PhishGuard does not store scan contents.</p>
               </div>
             </div>
 
@@ -379,7 +379,7 @@ export function ScannerPage() {
 
 const landingHighlights = [
   [ShieldCheck, "Authentication first", "SPF, DKIM, and DMARC context helps separate trusted infrastructure from impersonation."],
-  [Activity, "Local analysis", "Language and link signals run through your own PhishGuard service with no paid AI API."],
+  [Activity, "Private analysis", "Language and link signals run through the PhishGuard service with no paid AI API."],
   [BookOpenCheck, "Clear next steps", "Understand why a message was flagged and learn safer habits from the Standards guide."],
 ] as const;
 
@@ -389,7 +389,7 @@ export default function LandingPage() {
       <SiteHeader />
       <section className="mx-auto grid max-w-7xl gap-12 px-5 pb-20 pt-16 lg:grid-cols-[1.05fr_.95fr] lg:items-center lg:px-8 lg:pb-28 lg:pt-24">
         <div>
-          <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/70 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[.2em] text-emerald-700 dark:border-emerald-900/70 dark:bg-zinc-900/70 dark:text-emerald-300"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />Local-first email defense</p>
+          <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/70 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[.2em] text-emerald-700 dark:border-emerald-900/70 dark:bg-zinc-900/70 dark:text-emerald-300"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />Privacy-focused email defense</p>
           <h1 className="max-w-3xl text-5xl font-semibold leading-[.98] tracking-[-.06em] text-slate-950 dark:text-white sm:text-7xl">Know what&apos;s hiding<br /><span className="text-emerald-500">before you click.</span></h1>
           <p className="mt-7 max-w-xl text-base leading-8 text-slate-600 dark:text-slate-300">PhishGuard turns suspicious email into understandable evidence. Inspect sender identity, authentication signals, language, and links with an open-source security workflow you control.</p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row"><Link href="/scanner" className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 text-sm font-bold text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:-translate-y-0.5 hover:bg-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-950">Scan an email <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" aria-hidden="true" /></Link><Link href="/tips" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white/70 px-5 text-sm font-semibold text-slate-700 transition hover:border-emerald-400 hover:text-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:border-zinc-700 dark:bg-zinc-900/70 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:text-emerald-300 dark:focus:ring-offset-zinc-950">Explore standards <BookOpenCheck className="h-4 w-4" aria-hidden="true" /></Link></div>

@@ -1,6 +1,6 @@
 # PhishGuard
 
-PhishGuard is a free, open-source email security scanner. It checks sender identity, SPF/DKIM/DMARC authentication, message language, HTML content, and link destinations. Analysis runs locally on the deployed backend using deterministic security rules and an optional ONNX model; no paid AI API is required.
+PhishGuard is a free, open-source email security scanner. It checks sender identity, SPF/DKIM/DMARC authentication, message language, HTML content, and link destinations. Analysis runs on the PhishGuard backend using transparent rules and an open-source ONNX model; email content is not sent to a paid AI provider.
 
 ## Use the hosted app
 
@@ -58,6 +58,23 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 - `GET /api/health` - health check
 - `POST /api/analyze` - analyze `{ "sender": "...", "body": "...", "header": "..." }`
 - `GET /docs` - OpenAPI documentation
+
+## How the analysis works
+
+1. **Input cleaning:** BeautifulSoup removes HTML tags, scripts, styles, and MIME boundary noise so classifiers see human-readable text.
+2. **Sender and brand checks:** Python email parsing extracts the sender domain and compares claimed brands against known official domains to detect lookalikes and typosquatting.
+3. **Authentication checks:** `dnspython` reads DNS policies while the header parser evaluates SPF, DKIM, and DMARC results from supplied `Authentication-Results`. Pass results only receive the safety cap when domains align; critical malicious links still take priority.
+4. **Language and intent:** The Hugging Face tokenizer and ONNX Runtime execute the open-source phishing classifier on the cleaned sender/body text. Inference is serialized and bounded to protect service memory.
+5. **Link inspection:** `requests` follows safe HTTP redirects for short links. Private destinations, credential-bearing URLs, insecure schemes, suspicious domains, and mismatched anchor text are flagged.
+6. **Scoring and explanation:** Deterministic evidence is combined with the model signal to produce a 0-100 score, risk category, issue cards, link findings, and educational guidance. The result is advisory—not a guarantee of safety.
+
+### Why these checks matter
+
+- **Authentication** helps distinguish authorized mail infrastructure from forged senders.
+- **Domain and anchor checks** expose impersonation and links that disguise their real destination.
+- **Intent rules** identify pressure, credential harvesting, and financial manipulation.
+- **HTML/MIME cleaning** reduces false positives caused by markup and encoded email wrappers.
+- **The language model** adds context-sensitive detection for patterns that simple keywords miss, while deterministic rules keep the verdict explainable.
 
 ## Deploy your own instance
 

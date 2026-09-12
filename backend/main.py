@@ -31,7 +31,7 @@ async def lifespan(_: FastAPI):
 app = FastAPI(
     title="PhishGuard API",
     version="1.0.0",
-    description="Local-first phishing analysis API",
+    description="Privacy-focused phishing analysis API",
     lifespan=lifespan,
 )
 app.add_middleware(
