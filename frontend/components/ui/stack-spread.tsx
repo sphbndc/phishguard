@@ -25,21 +25,21 @@ type SignalCard = {
   title: string;
   detail: string;
   icon: LucideIcon;
-  tone: string;
+  tone: [string, string];
   x: number;
   y: number;
   rotate: number;
 };
 
 const SIGNALS: SignalCard[] = [
-  { title: "DMARC", detail: "Domain alignment", icon: ShieldCheck, tone: "from-emerald-300 to-emerald-600", x: -38, y: -32, rotate: -13 },
-  { title: "DKIM", detail: "Signed content", icon: Fingerprint, tone: "from-cyan-300 to-cyan-600", x: 30, y: -33, rotate: 15 },
-  { title: "Sender", detail: "Identity check", icon: MailCheck, tone: "from-violet-300 to-violet-600", x: -32, y: -4, rotate: -5 },
-  { title: "SPF", detail: "Authorized host", icon: Globe2, tone: "from-sky-300 to-sky-600", x: 31, y: -5, rotate: 5 },
-  { title: "Links", detail: "Destination scan", icon: Link2, tone: "from-amber-300 to-amber-500", x: -31, y: 23, rotate: 7 },
-  { title: "Intent", detail: "Language signals", icon: ScanSearch, tone: "from-fuchsia-300 to-fuchsia-600", x: 28, y: 23, rotate: -6 },
-  { title: "Secrets", detail: "Harvesting cues", icon: LockKeyhole, tone: "from-rose-300 to-rose-600", x: -12, y: 39, rotate: 3 },
-  { title: "Verdict", detail: "Action guidance", icon: TriangleAlert, tone: "from-teal-300 to-teal-600", x: 13, y: 39, rotate: -4 },
+  { title: "DMARC", detail: "Domain alignment", icon: ShieldCheck, tone: ["#6ee7b7", "#059669"], x: -38, y: -32, rotate: -13 },
+  { title: "DKIM", detail: "Signed content", icon: Fingerprint, tone: ["#67e8f9", "#0891b2"], x: 30, y: -33, rotate: 15 },
+  { title: "Sender", detail: "Identity check", icon: MailCheck, tone: ["#c4b5fd", "#7c3aed"], x: -32, y: -4, rotate: -5 },
+  { title: "SPF", detail: "Authorized host", icon: Globe2, tone: ["#7dd3fc", "#0284c7"], x: 31, y: -5, rotate: 5 },
+  { title: "Links", detail: "Destination scan", icon: Link2, tone: ["#fcd34d", "#f59e0b"], x: -31, y: 23, rotate: 7 },
+  { title: "Intent", detail: "Language signals", icon: ScanSearch, tone: ["#f0abfc", "#c026d3"], x: 28, y: 23, rotate: -6 },
+  { title: "Secrets", detail: "Harvesting cues", icon: LockKeyhole, tone: ["#fda4af", "#e11d48"], x: -12, y: 39, rotate: 3 },
+  { title: "Verdict", detail: "Action guidance", icon: TriangleAlert, tone: ["#5eead4", "#0d9488"], x: 13, y: 39, rotate: -4 },
 ];
 
 function SignalTile({ signal, progress, index, reduced, mobile }: { signal: SignalCard; progress: MotionValue<number>; index: number; reduced: boolean; mobile: boolean }) {
@@ -52,8 +52,8 @@ function SignalTile({ signal, progress, index, reduced, mobile }: { signal: Sign
 
   return (
     <motion.article
-      className={`absolute left-1/2 top-1/2 h-28 w-40 rounded-2xl border border-white/20 bg-gradient-to-br ${signal.tone} p-3.5 text-zinc-950 shadow-2xl shadow-black/30 sm:h-40 sm:w-60 sm:p-5`}
-      style={{ transform: translate, rotate: reduced ? 0 : rotate, scale, zIndex: index + 1 }}
+      className="absolute left-1/2 top-1/2 h-28 w-40 rounded-2xl border border-white/30 p-3.5 text-zinc-950 shadow-2xl shadow-black/30 sm:h-40 sm:w-60 sm:p-5"
+      style={{ background: `linear-gradient(135deg, ${signal.tone[0]}, ${signal.tone[1]})`, transform: translate, rotate: reduced ? 0 : rotate, scale, zIndex: index + 1 }}
     >
       <div className="flex items-start justify-between"><span className="grid h-9 w-9 place-items-center rounded-xl bg-white/35"><Icon size={18} /></span><span className="font-mono text-[10px] font-bold uppercase tracking-widest opacity-60">0{index + 1}</span></div>
       <h3 className="mt-5 text-base font-bold tracking-tight sm:mt-6 sm:text-xl">{signal.title}</h3>

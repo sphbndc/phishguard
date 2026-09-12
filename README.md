@@ -1,36 +1,42 @@
 # PhishGuard
 
-PhishGuard is a local-first email phishing analyzer. It combines a Hugging Face
-text classifier with transparent security heuristics, email-authentication header
-analysis, and safe URL unshortening. No paid API or hosted AI service is used.
+PhishGuard is a free, open-source email security scanner. It checks sender identity, SPF/DKIM/DMARC authentication, message language, HTML content, and link destinations. Analysis runs locally on the deployed backend using deterministic security rules and an optional ONNX model; no paid AI API is required.
 
-## Prerequisites
+## Use the hosted app
 
-- Python 3.10+
-- Node.js 20+
-- Internet access on first backend run to download the configured open-source
-  model into the local Hugging Face cache and to query public DNS/redirects
+Open the live scanner at **https://phishguard-drab-five.vercel.app**.
 
-## Run the backend
+1. Enter the sender address.
+2. Paste the email body as plain text or rich text.
+3. Add raw headers when available for stronger authentication checks.
+4. Select **Scan email for threat**.
+
+Results include a risk score, explainable evidence, unshortened links, educational guidance, clipboard export, and a branded PDF download. Treat every result as advisory and verify high-impact requests independently.
+
+## Run locally
+
+### Requirements
+
+- Python 3.10 or newer
+- Node.js 20 or newer
+- Internet access for the first model download and public DNS/link checks
+
+### Backend
 
 ```bash
 cd backend
 python -m venv .venv
-# Windows: .venv\Scripts\activate
+# Windows: .venv\\Scripts\\activate
 # macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 ```
 
-The local NLP signal uses a compact ONNX phishing-email model and runs one
-inference at a time. Set `PHISHGUARD_ENABLE_NLP=0` to disable it if a host is
-especially constrained; deterministic authentication, sender, language, and
-URL checks remain active. The model and tokenizer are cached under
-`PHISHGUARD_MODEL_DIR` (default `/tmp/phishguard-model`) and can be overridden
-with `PHISHGUARD_ONNX_MODEL_URL`, `PHISHGUARD_ONNX_TOKENIZER_URL`, and
-`PHISHGUARD_ONNX_CONFIG_URL`. Set `PHISHGUARD_ORT_THREADS` to tune CPU usage.
+The API is available at `http://localhost:8000`. Interactive API documentation is at `/docs`.
 
-## Run the frontend locally
+The ONNX classifier is enabled by default and performs one bounded inference at a time to protect memory. Set `PHISHGUARD_ENABLE_NLP=0` to run deterministic checks only. Model files are cached in `/tmp/phishguard-model` (or `PHISHGUARD_MODEL_DIR`). Advanced deployments can override the model URLs with `PHISHGUARD_ONNX_MODEL_URL`, `PHISHGUARD_ONNX_TOKENIZER_URL`, and `PHISHGUARD_ONNX_CONFIG_URL`.
+
+### Frontend
 
 ```bash
 cd frontend
@@ -38,62 +44,40 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000. This is the local development version; it does not
-replace the deployed site. The landing page is available at `/`, the scanner at
-`/scanner`, and the standards and security knowledge base at `/tips`. Locally, the frontend uses
-`http://localhost:8000` for the API by default; override it with
-`NEXT_PUBLIC_API_URL` in `frontend/.env.local` when testing another backend.
+Open `http://localhost:3000`. The landing page is `/`, the scanner is `/scanner`, and the security standards guide is `/tips`.
 
-The live frontend is available at:
-https://phishguard-drab-five.vercel.app
+To use a different API, create `frontend/.env.local`:
 
-## API endpoints
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
-- `GET /` — service status and API documentation link
-- `GET /api/health` — hosting-platform health check
-- `POST /api/analyze` — analyze sender, email body, and optional raw headers
-- `GET /docs` — interactive OpenAPI documentation
+## API
 
-The scanner also supports light/dark themes, raw-header extraction guidance,
-formatted clipboard reports, and branded PDF report downloads.
+- `GET /` - service status
+- `GET /api/health` - health check
+- `POST /api/analyze` - analyze `{ "sender": "...", "body": "...", "header": "..." }`
+- `GET /docs` - OpenAPI documentation
 
-## Deploy with GitHub and Vercel
+## Deploy your own instance
 
-Live frontend: [https://phishguard-drab-five.vercel.app](https://phishguard-drab-five.vercel.app)
-
-The Next.js client can be deployed directly from the public GitHub repository:
-
-1. Sign in at [vercel.com](https://vercel.com) with GitHub and choose
-   `sphbndc/phishguard`.
-2. Set **Root Directory** to `frontend` (keep the detected Next.js preset).
-3. Add `NEXT_PUBLIC_API_URL` as an environment variable containing the public
-   URL of your running FastAPI backend, then deploy.
-
-The FastAPI service should run separately on a Python host (for example,
-Render's free tier) because the local PyTorch/Hugging Face model is not a good
-fit for Vercel's short-lived serverless functions. Start it with:
+The Next.js frontend can be deployed to Vercel with the project root set to `frontend`. Set `NEXT_PUBLIC_API_URL` to the public HTTPS URL of a separately hosted FastAPI backend. Deploy the backend on a Python host such as Render with:
 
 ```bash
 cd backend
 uvicorn main:app --host 0.0.0.0 --port $PORT
 ```
 
-After deployment, add the backend's HTTPS URL to Vercel as
-`NEXT_PUBLIC_API_URL` and redeploy the frontend. Configure the backend's
-`PHISHGUARD_FRONTEND_ORIGIN` environment variable with the Vercel domain
-`https://phishguard-drab-five.vercel.app` before production use. Multiple
-comma-separated origins are supported for preview and production deployments.
+Configure the backend CORS variable `PHISHGUARD_FRONTEND_ORIGIN` with your Vercel domain. Keep both services on HTTPS in production.
 
-## Important limitations
+## Security and privacy
 
-PhishGuard is a decision-support tool, not a guarantee that an email is safe.
-SPF, DKIM, and DMARC are evaluated primarily from `Authentication-Results` and
-related trace headers. Cryptographic DKIM verification is attempted only when
-the supplied raw headers contain a DKIM signature and can be combined with the
-body into a complete message. Do not click or reply to a suspicious message
-solely because a scan reports a low score.
+- HTML, CSS, scripts, and MIME wrappers are cleaned before analysis.
+- Link checks block private/reserved destinations and limit redirects.
+- SPF, DKIM, and DMARC pass results are only trusted when domains align; critical malicious links remain decisive.
+- Scan content is not stored by the application.
+- A low score is not a guarantee of safety. Never disclose passwords, one-time codes, or payment details by email.
 
-Email HTML and MIME wrappers are normalized with BeautifulSoup before heuristic
-and local-model analysis. When all three authentication mechanisms explicitly
-pass and align with the visible sender domain, the API applies a hard maximum
-risk score of 12 (Safe).
+## License
+
+This project is released under the MIT License. See [LICENSE](LICENSE) for details.
